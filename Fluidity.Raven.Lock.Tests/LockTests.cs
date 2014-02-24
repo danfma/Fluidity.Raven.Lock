@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Raven.Client;
+using Raven.Client.Embedded;
 
 namespace Fluidity.Raven.Lock.Tests
 {
@@ -28,8 +29,11 @@ namespace Fluidity.Raven.Lock.Tests
 		[TestFixtureSetUp]
 		public void BeforeAll()
 		{
-			//_documentStore = new DocumentStoreFactory().Create("InMemory");
-			// TODO Download the Raven.Embedded and use it on memory (there is a problem with the current version on nuget).
+			_documentStore = new EmbeddableDocumentStore {
+				RunInMemory = true
+			};
+
+			_documentStore.Initialize();
 		}
 
 		[TestFixtureTearDown]
@@ -52,8 +56,7 @@ namespace Fluidity.Raven.Lock.Tests
 				Assert.That(session.Load<Lock>("Locks/A"), Is.Null);
 				session.Advanced.Clear();
 
-				var lockInstance = new Lock
-				{
+				var lockInstance = new Lock {
 					Id = "Locks/A",
 					Expiration = DateTime.UtcNow.AddMilliseconds(500)
 				};
@@ -62,8 +65,7 @@ namespace Fluidity.Raven.Lock.Tests
 				session.SaveChanges();
 				session.Advanced.Clear();
 
-				Task task = Task.Factory.StartNew(() =>
-				{
+				Task task = Task.Factory.StartNew(() => {
 					using (session.Lock("A"))
 					{
 						Console.WriteLine("Locked");
@@ -86,8 +88,7 @@ namespace Fluidity.Raven.Lock.Tests
 			bool locked = false;
 
 
-			Task task1 = Task.Factory.StartNew(() =>
-			{
+			Task task1 = Task.Factory.StartNew(() => {
 				Console.WriteLine("Starting Task 1");
 
 				using (IDocumentSession session = _documentStore.OpenSession())
@@ -106,8 +107,7 @@ namespace Fluidity.Raven.Lock.Tests
 				}
 			});
 
-			Task task2 = Task.Factory.StartNew(() =>
-			{
+			Task task2 = Task.Factory.StartNew(() => {
 				while (!locked)
 				{
 					Console.Write(".");
@@ -298,8 +298,7 @@ namespace Fluidity.Raven.Lock.Tests
 			{
 				session.Advanced.MaxNumberOfRequestsPerSession = int.MaxValue;
 
-				var sharedObject = new SharedObject
-				{
+				var sharedObject = new SharedObject {
 					Coins = 0
 				};
 
@@ -312,8 +311,7 @@ namespace Fluidity.Raven.Lock.Tests
 				Assert.That(session.Load<Lock>("Locks/A"), Is.Null);
 				session.Advanced.Clear();
 
-				Action<int> action = coins =>
-				{
+				Action<int> action = coins => {
 					using (IDisposable locker = session.Lock("A"))
 					{
 						lockInstance = session.Load<Lock>("Locks/A");
