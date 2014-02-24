@@ -9,7 +9,8 @@
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/danfma/Fluidity.Raven.Lock</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Pessimistic locks in RavenDB</description>
+    <description>Pessimistic locks for RavenDB</description>
+		<summary>Pessimistic lock for RavenDB</summary>
     <releaseNotes>First publish.</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>RavenDB Lock</tags>
