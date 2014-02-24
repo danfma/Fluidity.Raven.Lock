@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Fluidity.Raven.Lock</id>
+    <version>1.0</version>
+    <title>Fluidity.Raven.Lock</title>
+    <authors>Daniel Ferreira Monteiro Alves</authors>
+    <owners>Daniel Ferreira Monteiro Alves</owners>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/danfma/Fluidity.Raven.Lock</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Pessimistic locks in RavenDB</description>
+    <releaseNotes>First publish.</releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>RavenDB Lock</tags>
+		<dependencies>
+			<dependency id="RavenDB.Client" version="2.5.2750" />
+		</dependencies>
+  </metadata>
+</package>
