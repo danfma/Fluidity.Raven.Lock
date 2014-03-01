@@ -98,12 +98,14 @@ namespace Fluidity.Raven.Lock
 		/// <exception cref="System.TimeoutException"></exception>
 		private void WaitToLock(TimeSpan timeout, TimeSpan lifetime)
 		{
-			DateTime maximumTime = DateTime.Now + timeout;
+			Stopwatch stopWatch = new Stopwatch();
+			stopWatch.Start();
+
 			int attempt = 0;
 
 			do
 			{
-				bool expired = DateTime.Now > maximumTime;
+				bool expired = stopWatch.Elapsed > timeout;
 
 				if (expired)
 					throw new TimeoutException();
