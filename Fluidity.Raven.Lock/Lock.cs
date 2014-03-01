@@ -3,6 +3,9 @@ using Raven.Imports.Newtonsoft.Json;
 
 namespace Fluidity.Raven.Lock
 {
+	/// <summary>
+	///     The lock instance that will be created on the database.
+	/// </summary>
 	public sealed class Lock
 	{
 		/// <summary>
@@ -14,18 +17,30 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Identificação do objeto
+		///     Gets or sets the identifier.
 		/// </summary>
+		/// <value>
+		///     The identifier.
+		/// </value>
 		public string Id { get; set; }
 
 		/// <summary>
-		///     A data de expiração para o lock.
+		///     Gets or sets the expiration date.
 		/// </summary>
+		/// <value>
+		///     The expiration date.
+		/// </value>
 		public DateTime Expiration { get; set; }
 
 		/// <summary>
-		///     Determina se este lock já foi expirado.
+		///     Gets a value indicating whether this lock has expired.
 		/// </summary>
+		/// <remarks>
+		///     This property is not persitent.
+		/// </remarks>
+		/// <value>
+		///     <c>true</c> if has expired; otherwise, <c>false</c>.
+		/// </value>
 		[JsonIgnore]
 		public bool Expired
 		{

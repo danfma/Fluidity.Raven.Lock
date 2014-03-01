@@ -7,6 +7,9 @@ using Raven.Client;
 
 namespace Fluidity.Raven.Lock
 {
+	/// <summary>
+	///     The locker
+	/// </summary>
 	public sealed class Locker : ILocker
 	{
 		private const int TickMilliseconds = 50;
@@ -43,6 +46,19 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
+		///     Estende o tempo de vido do lock, para garantir que a tarefa seja executada.
+		/// </summary>
+		/// <param name="lifetime">The lifetime.</param>
+		/// <exception cref="System.NotImplementedException"></exception>
+		public void Renew(TimeSpan lifetime)
+		{
+			_lock.Expiration = DateTime.UtcNow + lifetime;
+			_session.Store(_lock, _lockEtag, _lock.Id);
+			_session.SaveChanges();
+			_lockEtag = _session.Advanced.GetEtagFor(_lock);
+		}
+
+		/// <summary>
 		///     Finalizes an instance of the <see cref="Locker" /> class.
 		/// </summary>
 		~Locker()
@@ -51,8 +67,12 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Releases the mutex.
+		///     Releases unmanaged and - optionally - managed resources.
 		/// </summary>
+		/// <param name="disposing">
+		///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+		///     unmanaged resources.
+		/// </param>
 		private void Dispose(bool disposing)
 		{
 			if (_session != null && _lock != null)
@@ -76,7 +96,7 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Cria uma nova sessão de documentos.
+		///     Creates an isolated session.
 		/// </summary>
 		/// <returns></returns>
 		private IDocumentSession CreateSession()
@@ -90,15 +110,14 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Tenta adquirir o lock, esperando dentro do tempo limite especificado.
+		///     Waits to lock to be acquired.
 		/// </summary>
 		/// <param name="timeout">The timeout.</param>
 		/// <param name="lifetime">The lifetime.</param>
-		/// <returns></returns>
 		/// <exception cref="System.TimeoutException"></exception>
 		private void WaitToLock(TimeSpan timeout, TimeSpan lifetime)
 		{
-			Stopwatch stopWatch = new Stopwatch();
+			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
 			int attempt = 0;
@@ -114,19 +133,19 @@ namespace Fluidity.Raven.Lock
 					break;
 
 				Wait();
-
 			} while (true);
 		}
 
 		/// <summary>
-		/// Tenta obter um lock (criando um objeto Lock no servidor remoto).
+		///     Try to acquire the lock.
 		/// </summary>
-		/// <param name="lockName">O nome do lock</param>
+		/// <remarks>
+		///     If after to many attempts the lock is not acquired, it also checks if that lock is expired, so it could remove it.
+		/// </remarks>
+		/// <param name="lockName">Name of the lock.</param>
 		/// <param name="lifetime">The lifetime.</param>
 		/// <param name="attempt">The attempt.</param>
-		/// <returns>
-		///   <c>true</c> se foi possível adquirir o lock; caso contrário, <c>false</c>.
-		/// </returns>
+		/// <returns></returns>
 		private bool TryAcquireLock(string lockName, TimeSpan lifetime, int attempt)
 		{
 			bool acquired = false;
@@ -147,7 +166,7 @@ namespace Fluidity.Raven.Lock
 			{
 				Trace.WriteLine("Session already locked for " + lockName);
 
-				if (attempt % 3 == 0)
+				if (attempt%3 == 0)
 					RemoveExpiredLock(_lock.Id);
 
 				_lock = null;
@@ -158,22 +177,9 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Estende o tempo de vido do lock, para garantir que a tarefa seja executada.
+		///     Removes the expired lock.
 		/// </summary>
-		/// <param name="lifetime">The lifetime.</param>
-		/// <exception cref="System.NotImplementedException"></exception>
-		public void Renew(TimeSpan lifetime)
-		{
-			_lock.Expiration = DateTime.UtcNow + lifetime;
-			_session.Store(_lock, _lockEtag, _lock.Id);
-			_session.SaveChanges();
-			_lockEtag = _session.Advanced.GetEtagFor(_lock);
-		}
-
-		/// <summary>
-		///     Remove um lock criado anteriormente que já expirou.
-		/// </summary>
-		/// <param name="lockId"></param>
+		/// <param name="lockId">The lock identifier.</param>
 		private void RemoveExpiredLock(string lockId)
 		{
 			using (IDocumentSession session = _documentStore.OpenSession())
@@ -189,7 +195,7 @@ namespace Fluidity.Raven.Lock
 		}
 
 		/// <summary>
-		///     Espera por um tempo especificado para tentar novamente.
+		///     Waits for some time.
 		/// </summary>
 		private void Wait()
 		{

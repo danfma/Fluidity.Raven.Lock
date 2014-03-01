@@ -3,6 +3,9 @@ using Raven.Client;
 
 namespace Fluidity.Raven.Lock
 {
+	/// <summary>
+	/// Extensions for the <see cref="IDocumentSession"/>.
+	/// </summary>
 	public static class DocumentSessionExtensions
 	{
 		/// <summary>
