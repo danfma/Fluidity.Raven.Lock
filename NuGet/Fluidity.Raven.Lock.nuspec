@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Fluidity.Raven.Lock</id>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <title>Fluidity.Raven.Lock</title>
     <authors>Daniel Ferreira Monteiro Alves</authors>
     <owners>Daniel Ferreira Monteiro Alves</owners>
